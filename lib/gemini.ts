@@ -61,7 +61,7 @@ export async function analyzeMessage(message: string): Promise<AnalysisResult> {
     }
 
     const client = new GoogleGenerativeAI(apiKey);
-    const model = client.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = client.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const result = await model.generateContent(buildPrompt(message));
     const rawText = result.response.text().trim();
@@ -111,7 +111,7 @@ export async function generateDashboardSummary(
     }
 
     const client = new GoogleGenerativeAI(apiKey);
-    const model = client.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = client.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const result = await model.generateContent(buildSummaryPrompt(entries));
     const summary = result.response.text().trim();

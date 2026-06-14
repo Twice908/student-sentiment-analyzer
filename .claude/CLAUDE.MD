@@ -75,7 +75,7 @@ lib/                   # Utilities, types, Firebase, Gemini clients
 ### Gemini AI
 
 - Client initialized in `lib/gemini.ts`.
-- Model: `gemini-1.5-flash` only.
+- Model: `gemini-2.5-flash` only (`gemini-1.5-flash` has been retired by Google and returns 404).
 - Always request JSON output. Parse and validate before use.
 - Wrap every Gemini call in try/catch. On failure, return a safe fallback object — never throw to the UI.
 - Expected response shape is defined in `lib/types.ts` as `AnalysisResult`.
