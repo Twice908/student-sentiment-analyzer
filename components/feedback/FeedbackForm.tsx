@@ -1,24 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { mockAnalysis } from "@/lib/mockData";
+import { AnalysisResult } from "@/lib/types";
 import SubmissionSuccess from "./SubmissionSuccess";
 
 const MAX_LENGTH = 1000;
+
+type SubmitStage = "idle" | "analyzing" | "submitting";
 
 export default function FeedbackForm() {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [stage, setStage] = useState<SubmitStage>("idle");
   const [error, setError] = useState<string | null>(null);
 
-  if (submitted) {
+  if (submitted && analysis) {
     return (
       <SubmissionSuccess
-        analysis={mockAnalysis}
+        analysis={analysis}
         onReset={() => {
           setSubmitted(false);
+          setAnalysis(null);
           setTitle("");
           setMessage("");
           setError(null);
@@ -30,19 +34,34 @@ export default function FeedbackForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
-    setIsLoading(true);
 
     try {
+      setStage("analyzing");
+      const analyzeResponse = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+
+      if (!analyzeResponse.ok) {
+        const data = await analyzeResponse.json();
+        throw new Error(data.error || "Failed to analyze feedback");
+      }
+
+      const analyzeData = await analyzeResponse.json();
+      const result: AnalysisResult = analyzeData.data;
+
+      setStage("submitting");
       const response = await fetch("/api/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: title || undefined,
           message,
-          sentiment: mockAnalysis.sentiment,
-          stressLevel: mockAnalysis.stressLevel,
-          category: mockAnalysis.category,
-          summary: mockAnalysis.summary,
+          sentiment: result.sentiment,
+          stressLevel: result.stressLevel,
+          category: result.category,
+          summary: result.summary,
         }),
       });
 
@@ -51,15 +70,24 @@ export default function FeedbackForm() {
         throw new Error(data.error || "Failed to save feedback");
       }
 
+      setAnalysis(result);
       setSubmitted(true);
     } catch (err) {
       const message = err instanceof Error ? err.message : "An error occurred";
       setError(message);
       console.error("Feedback submission error:", message);
     } finally {
-      setIsLoading(false);
+      setStage("idle");
     }
   };
+
+  const isLoading = stage !== "idle";
+  const submitLabel =
+    stage === "analyzing"
+      ? "Analyzing your feedback…"
+      : stage === "submitting"
+      ? "Submitting..."
+      : "Submit Anonymously";
 
   return (
     <form
@@ -115,7 +143,7 @@ export default function FeedbackForm() {
         disabled={message.trim().length === 0 || isLoading}
         className="mt-6 w-full rounded-full bg-[#0D5C63] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#0D5C63]/90 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {isLoading ? "Submitting..." : "Submit Anonymously"}
+        {submitLabel}
       </button>
     </form>
   );

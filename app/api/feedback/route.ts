@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAllFeedback, saveFeedback } from "@/lib/feedbackService";
 import { FeedbackEntry } from "@/lib/types";
 
-// type FeedbackSubmission = Omit<FeedbackEntry, "id" | "createdAt">;
 type FeedbackSubmission = Omit<FeedbackEntry, "id" | "createdAt">;
 
 function isFeedbackSubmission(body: unknown): body is FeedbackSubmission {

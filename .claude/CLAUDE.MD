@@ -113,13 +113,33 @@ lib/                   # Utilities, types, Firebase, Gemini clients
 - Placeholder `lib/firebase.ts`, `lib/gemini.ts`
 - Build passing, all routes 200, mobile responsive confirmed
 
+✅ Phase 1 — Firebase Integration (COMPLETE)
+
+- `lib/firebase.ts`, `lib/feedbackService.ts` wired to real Firestore
+- `app/api/feedback/route.ts` GET/POST against the `feedback` collection
+- Dashboard reads real aggregated stats
+
+✅ Phase 2 — Gemini AI Integration (COMPLETE)
+
+- `lib/gemini.ts` calls `gemini-1.5-flash` via `analyzeMessage()`, with JSON validation and safe fallback
+- `app/api/analyze/route.ts` POST endpoint
+- `FeedbackForm.tsx` calls `/api/analyze` then `/api/feedback`, shows real analysis badges and an "Analyzing your feedback…" loading state
+- `mockAnalysis` removed from `lib/mockData.ts`
+
+✅ Phase 3 — AI Summary Report (COMPLETE)
+
+- `generateDashboardSummary()` added to `lib/gemini.ts` with safe fallback
+- `app/api/summary/route.ts` GET endpoint returns `{ summary, generatedAt }`
+- `AISummaryCard.tsx` fetches real summary on mount, supports regenerate, shows loading spinner and timestamp
+- `aiSummary` mock removed from `lib/mockData.ts`
+
 ---
 
 ## Phases
 
 ---
 
-### Phase 1 — Firebase Integration
+### Phase 1 — Firebase Integration ✅ COMPLETE
 
 **Goal:** Wire real Firestore reads and writes. No AI yet.
 
@@ -158,7 +178,7 @@ export interface DashboardStats {
 
 ---
 
-### Phase 2 — Gemini AI Integration
+### Phase 2 — Gemini AI Integration ✅ COMPLETE
 
 **Goal:** Every feedback submission is analyzed by Gemini before saving.
 
@@ -200,7 +220,7 @@ Response format:
 
 ---
 
-### Phase 3 — AI Summary Report
+### Phase 3 — AI Summary Report ✅ COMPLETE
 
 **Goal:** Auto-generate an AI summary of all feedback for the teacher dashboard.
 
